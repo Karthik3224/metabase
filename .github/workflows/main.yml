@@ -1,0 +1,27 @@
+name: Sync upstream -> fork
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # every 6 hours
+  workflow_dispatch:         # allow manual run too
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+          persist-credentials: true
+
+      - name: Add upstream
+        run: |
+          git remote add upstream https://github.com/metabase/metabase.git || true
+          git fetch upstream
+
+      - name: Merge upstream/main
+        run: |
+          git checkout main
+          git merge --no-edit upstream/main || true
+          git push origin main || true
